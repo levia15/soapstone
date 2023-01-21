@@ -1,10 +1,10 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm'
+import { Entity, PrimaryGeneratedColumn, Column, PrimaryColumn } from 'typeorm'
 
 @Entity()
 export class Message {
 
-    @PrimaryGeneratedColumn()
-    messageid: number
+    @PrimaryColumn()
+    messageid: string
 
     @Column()
     userid: number
@@ -21,7 +21,10 @@ export class Message {
     @Column()
     postdate: Date
 
-    @Column()
-    score: number
+    @Column("text", {array: true})
+    upvotes: string[]
+
+    @Column("text", {array: true})
+    downvotes: string[]
 
 }
