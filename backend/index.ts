@@ -1,37 +1,61 @@
 import "reflect-metadata"
 import express, { raw } from 'express';
 import { Between, DataSource, Not } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, PrimaryColumn } from 'typeorm'
 import { v4 as uuid } from 'uuid';
-import { Message } from "./database.js";
+
+@Entity()
+export class Message {
+
+    @PrimaryColumn()
+    messageid: string
+
+    @Column()
+    userid: string
+
+    @Column()
+    body: string
+
+    @Column("numeric")
+    latitude: number
+
+    @Column("numeric")
+    longitude: number
+
+    @Column()
+    postdate: Date
+
+    @Column("text", {array: true})
+    upvotes: string[]
+
+    @Column("text", {array: true})
+    downvotes: string[]
+
+}
 
 const database = new DataSource({
     type: 'postgres',
-    host: 'localhost',
-    port: 5432,
-    username: 'postgres',
-    password: 'postgres',
-    database: 'soapstone',
-    entities: [Message],
+    url: process.env.DATABASE_URL,
+    entities: [ Message ],
+    ssl: {
+        rejectUnauthorized: false
+    },
     synchronize: true,
     logging: false
 });
-
-database.initialize()
-    .then(() => {
-        console.log("Database connection initialized.")
-    })
-    .catch((err) => console.log(err))
 
 const app = express();
 app.use(express.json());
 
 //GET: Get a randomly selected message for current location
 app.get('/', async (req, res) => {
-    const body = req.body;
+    const query = req.query;
+    if (!req.query.hasOwnProperty('userid') || !req.query.hasOwnProperty('latitude') || !req.query.hasOwnProperty('longitude'))
+        return res.send([{"messageid": "", "body": "", "score": 0, "date": "", "message": "malformed request"}])
     const raw_msgs = (await database.getRepository(Message).findBy({
-        userid: Not(body.userid),
-        latitude: Between(body.latitude - 0.00005, body.latitude + 0.00005),
-        longitude: Between(body.longitude - 0.00005, body.longitude + 0.00005)
+        userid: Not(query.userid as string),
+        latitude: Between(Number(query.latitude as string) - 0.0005, Number(query.latitude as string) + 0.0005),
+        longitude: Between(Number(query.longitude as string) - 0.0005, Number(query.longitude as string) + 0.0005)
     })).slice(0, 5);
     const msgs = [];
     for (let i = 0; i < raw_msgs.length; i++) {
@@ -50,6 +74,8 @@ app.get('/', async (req, res) => {
 //POST: Post a new message
 app.post('/', async (req, res) => {
     const body = req.body
+    if (!body.hasOwnProperty('userid') || !body.hasOwnProperty('body') || !body.hasOwnProperty('latitude') || !body.hasOwnProperty('longitude'))
+        return res.json({"success": false, "message": "malformed request"})
     const msg = new Message();
     msg.messageid = uuid();
     msg.userid = body.userid;
@@ -68,6 +94,8 @@ app.post('/', async (req, res) => {
 //POST: Vote on a message
 app.post('/vote', async (req, res) => {
     const body = req.body;
+    if (!body.hasOwnProperty('userid') || !body.hasOwnProperty('messageid') || !body.hasOwnProperty('upvote'))
+        return res.json({"success": false, "message": "malformed request"})
     const msg = await database.getRepository(Message).findOneBy({
         messageid: body.messageid
     })
@@ -89,4 +117,10 @@ app.post('/vote', async (req, res) => {
     return res.json({"success": true, "message": ""});
 });
 
-app.listen(3000);
+
+database.initialize()
+    .then(() => {
+        console.log("Database connection initialized.")
+        app.listen(process.env.PORT || 3000);
+    })
+    .catch((err) => console.log(err))
