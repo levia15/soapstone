@@ -5,7 +5,6 @@ import Quotes from './components/Quotes';
 const App = () => {
   return(
     <View>
-      <Text>Hello World!</Text>
       <Quotes></Quotes>
     </View>
   )
