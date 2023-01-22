@@ -7,15 +7,15 @@ export class Message {
     messageid: string
 
     @Column()
-    userid: number
+    userid: string
 
     @Column()
     body: string
 
-    @Column()
+    @Column("numeric")
     latitude: number
 
-    @Column()
+    @Column("numeric")
     longitude: number
 
     @Column()
