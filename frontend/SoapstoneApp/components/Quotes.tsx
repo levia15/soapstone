@@ -1,6 +1,6 @@
 import React from 'react';
 import { useState, useEffect } from 'react';
-import { Button, Image, PermissionsAndroid, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import { Button, Image, PermissionsAndroid, StyleSheet, Text, TextInput, TouchableOpacity, View} from 'react-native';
 import Geolocation from 'react-native-geolocation-service';
 // import leftAngleBracket from './logo.png' 
 
@@ -63,14 +63,6 @@ const Quotes = () => {
 
 	const [position, setPosition] = useState<Geolocation.GeoPosition | null>(null);
 	const [quotes, setQuotes] = useState<any | null>(null);
-	const leftAngle = "<";
-	const rightAngle = ">";
-	type QuoteObj = {
-		messageId: string;
-		score: number;
-		body: string;
-		date: Date
-	  };
 
 	useEffect(() => {    
 		PermissionsAndroid.request(
@@ -114,8 +106,6 @@ const Quotes = () => {
 		setQuotes(resultArray)
 
 
-
-
 		// await fetch(``)
 		// .then(res => res.json())
 		// .then(result => {
@@ -133,35 +123,30 @@ const Quotes = () => {
 				</View>
 			</View>
 			<View style={{ flexDirection:"row", justifyContent: 'center', padding: 15}}>
-				<Button title="Back"/>
+				<Button onPress={() => console.log("back")} title="Back"/>
 				<Text>            </Text>
-				<Button title="Next"/>
+				<Button onPress={() => console.log("next")} title="Next"/>
 			</View>
+			<TextInput style={styles.input} placeholder="Share your thoughts"/>
+			<View style={{padding: 15}}>
+				<Button onPress={() => console.log("submit")} title="Submit"/>
+			</View>
+
 		</>	
-
-
-			// {/* <Text>{position?.coords.latitude} </Text>
-			// <Text>{position?.coords.longitude} </Text>     
-			// 	<Box alignItems="center">
-			// 		<TouchableOpacity style={{height: 50, width: 50, backgroundColor: "blue"}} onPress={() => console.log("hello world")}>
-    		// 			<Image source={require(`../images/left-angle-bracket.jpg`)} resizeMode='contain' style={{flex:.2, height: "100%", width: "100%"}} />
-			// 		</TouchableOpacity>
-			// 	</Box> */}
-
 	);
 };
 
 const QuoteObj = (messageId: string, score: number, body: string, date: Date) => { return { messageId : messageId, score : score, body : body, date : date }}
 
 const styles = StyleSheet.create({
-	navButton: {
-		backgroundColor: 'green',
-		borderRadius: 0,
-		borderColor: 'black',
-		height: 40,
-		width: 40,
-		padding: 0.2
-	},
+	input: {
+		height: '30%',
+		margin: 12,
+		borderWidth: 1,
+		padding: 10,
+		borderColor: 'lightgray',
+		
+	  },
 	card: {
 		boarderRadius: 6,
 		elevation: 3,
@@ -172,7 +157,7 @@ const styles = StyleSheet.create({
 		shadowRadius: 2,
 		marginHorizontal: 4,
 		marginVertical: 6,
-		height: "60%",
+		height: "45%",
 		justifyContent: 'center',
 		alignItems: 'center',
 		paddingTop: 20
