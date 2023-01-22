@@ -132,7 +132,11 @@ const Quotes = () => {
 					</Text>
 				</View>
 			</View>
-
+			<View style={{ flexDirection:"row", justifyContent: 'center', padding: 15}}>
+				<Button title="Back"/>
+				<Text>            </Text>
+				<Button title="Next"/>
+			</View>
 		</>	
 
 
