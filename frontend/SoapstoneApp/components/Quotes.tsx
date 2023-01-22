@@ -63,6 +63,9 @@ const Quotes = () => {
 
 	const [position, setPosition] = useState<Geolocation.GeoPosition | null>(null);
 	const [quotes, setQuotes] = useState<any | null>(null);
+	const [quoteIndex, setQuoteIndex] = useState<number>(0);
+
+	console.log(quoteIndex)
 
 	useEffect(() => {    
 		PermissionsAndroid.request(
@@ -80,6 +83,7 @@ const Quotes = () => {
 					(pos) => {
 					  console.log(pos);
 					  setPosition(pos);
+					  fetchQuotes();
 					},
 					(error) => {
 					  console.log(error.code, error.message);
@@ -88,8 +92,6 @@ const Quotes = () => {
 				);
 			  }
 		  })
-
-		  fetchQuotes();
 	}, []);
 
 	const fetchQuotes = async () => {
@@ -117,19 +119,19 @@ const Quotes = () => {
 		<>
 			<View style={styles.card}>
 				<View style={styles.cardContent}>
-					<Text>
-						this is a  long quote that someone cound post using the app
-					</Text>
+					{quotes &&<Text>
+						{quotes[quoteIndex].body}
+					</Text>}
 				</View>
 			</View>
-			<View style={{ flexDirection:"row", justifyContent: 'center', padding: 15}}>
-				<Button onPress={() => console.log("back")} title="Back"/>
-				<Text>            </Text>
-				<Button onPress={() => console.log("next")} title="Next"/>
+			<View style={{ flexDirection:"row", justifyContent: 'space-around', padding: 15}}>
+				{quoteIndex !== 0 && <Button onPress={() => {setQuoteIndex(quoteIndex-1); console.log("back")}} title="Back"/>}
+				
+				{quoteIndex !== quotes?.length -1 &&<Button onPress={() => {setQuoteIndex(quoteIndex+1); console.log("next")}} title="Next"/>}
 			</View>
 			<TextInput style={styles.input} placeholder="Share your thoughts"/>
 			<View style={{padding: 15}}>
-				<Button onPress={() => console.log("submit")} title="Submit"/>
+				<Button onPress={() => {console.log("submit");}} title="Submit"/>
 			</View>
 
 		</>	
