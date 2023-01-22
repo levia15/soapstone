@@ -1,6 +1,6 @@
 import React from 'react';
 import { useState, useEffect } from 'react';
-import { Button, Image, PermissionsAndroid, StyleSheet, Text, TextInput, TouchableOpacity, View} from 'react-native';
+import { Alert, Button, Image, PermissionsAndroid, StyleSheet, Text, TextInput, TouchableOpacity, View} from 'react-native';
 import Geolocation from 'react-native-geolocation-service';
 // import leftAngleBracket from './logo.png' 
 
@@ -65,8 +65,9 @@ const Quotes = () => {
 	const [quotes, setQuotes] = useState<any | null>(null);
 	const [quoteIndex, setQuoteIndex] = useState<number>(0);
 	const [textInput, setTextInput] = useState('');
-
-	console.log(quoteIndex)
+	const [alert, setAlert] = useState(false);
+	const [empty, setEmpty] = useState(false);
+	const [userId, setUserId] = useState('1234')
 
 	useEffect(() => {    
 		PermissionsAndroid.request(
@@ -96,33 +97,46 @@ const Quotes = () => {
 	}, []);
 
 	const fetchQuotes = async () => {
-		/**
-		 * TODO: get API
-		 * Currently use fake data
-		 */
 
-		let resultArray:any = [];
-		quotesFromAPI.forEach((item) => {
-			resultArray.push(QuoteObj(item.messageId, item.score, item.body, item.date));
+		fetch(`https://soapstone.herokuapp.com?latitude=${position?.coords.latitude}&longitude=${position?.coords.longitude}&userid=${userId}`, {
+			method: "GET",
+			headers: { 'Content-Type': 'application/json'},   
+		})
+		.then(res => res.json())
+		.then(result => {
+			let resultArray:any = [];
+			result.forEach((item: { messageId: string; score: number; body: string; date: Date; }) => {
+				resultArray.push(QuoteObj(item.messageId, item.score, item.body, item.date));
+			});
+			setQuotes(resultArray)
 		});
 
-		setQuotes(resultArray)
-
-
-		// await fetch(``)
-		// .then(res => res.json())
-		// .then(result => {
-		//   setQuotes(result);
-		// });
 	  }
 
 	const sendQuote = async () => {
-		/**
-		 * TODO: post API
-		 */
-		console.log(textInput)
-
-		setTextInput('');
+		if(textInput=='')
+			setEmpty(true)
+		else {
+			await fetch(`https://soapstone.herokuapp.com?`, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({
+					   'latitude': `${position?.coords.latitude}`,
+					   'longitude': `${position?.coords.longitude}`,
+					   'userid': `${userId}`,
+					   'body': `${textInput}`
+					 }),
+			   })
+			.then(res => res.json())
+			.then(result => {
+				if(result.success)
+					setTextInput('');
+				else {
+					setAlert(true);
+				}
+			})
+		}
+		
 	}
 
 
@@ -136,11 +150,13 @@ const Quotes = () => {
 				</View>
 			</View>
 			<View style={{ flexDirection:"row", justifyContent: 'space-around', padding: 15}}>
-				{quoteIndex !== 0 && <Button onPress={() => {setQuoteIndex(quoteIndex-1); console.log("back")}} title="Back"/>}
-				{quoteIndex !== quotes?.length -1 &&<Button onPress={() => {setQuoteIndex(quoteIndex+1); console.log("next")}} title="Next"/>}
+				{quoteIndex !== 0 && <Button onPress={() => {setQuoteIndex(quoteIndex-1);}} title="Back"/>}
+				{quoteIndex !== quotes?.length -1 &&<Button onPress={() => {setQuoteIndex(quoteIndex+1);}} title="Next"/>}
 			</View>
-			<TextInput style={styles.input} onChangeText={textInput => setTextInput(textInput)} placeholder="Share your thoughts" value={textInput} multiline
+			<TextInput style={styles.input} onChangeText={textInput => {setTextInput(textInput); setEmpty(false); setAlert(false)}} placeholder="Share your thoughts" value={textInput} multiline
         numberOfLines={8}/>
+		{alert && <Text style={{color:'red'}}>Could not submit message!</Text>}
+		{empty && <Text style={{color:'red'}}>Please type a message!</Text>}
 			<View style={{padding: 15}}>
 				<Button onPress={() => sendQuote()} title="Submit"/>
 			</View>
