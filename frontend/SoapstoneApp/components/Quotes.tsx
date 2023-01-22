@@ -96,6 +96,10 @@ const Quotes = () => {
 		  })
 	}, []);
 
+	useEffect(() => {
+		fetchQuotes()
+	}, [position])
+
 	const fetchQuotes = async () => {
 
 		fetch(`https://soapstone.herokuapp.com?latitude=${position?.coords.latitude}&longitude=${position?.coords.longitude}&userid=${userId}`, {
@@ -105,8 +109,10 @@ const Quotes = () => {
 		.then(res => res.json())
 		.then(result => {
 			let resultArray:any = [];
-			result.forEach((item: { messageId: string; score: number; body: string; date: Date; }) => {
+			result.forEach((item: any) => {
+				console.log(item)
 				resultArray.push(QuoteObj(item.messageId, item.score, item.body, item.date));
+				console.log(item.body);
 			});
 			setQuotes(resultArray)
 		});
@@ -145,7 +151,7 @@ const Quotes = () => {
 			<View style={styles.card}>
 				<View style={styles.cardContent}>
 					{quotes &&<Text>
-						{quotes[quoteIndex].body}
+						{quotes[quoteIndex]?.body}
 					</Text>}
 				</View>
 			</View>
