@@ -64,6 +64,7 @@ const Quotes = () => {
 	const [position, setPosition] = useState<Geolocation.GeoPosition | null>(null);
 	const [quotes, setQuotes] = useState<any | null>(null);
 	const [quoteIndex, setQuoteIndex] = useState<number>(0);
+	const [textInput, setTextInput] = useState('');
 
 	console.log(quoteIndex)
 
@@ -115,6 +116,16 @@ const Quotes = () => {
 		// });
 	  }
 
+	const sendQuote = async () => {
+		/**
+		 * TODO: post API
+		 */
+		console.log(textInput)
+
+		setTextInput('');
+	}
+
+
 	return (
 		<>
 			<View style={styles.card}>
@@ -126,12 +137,12 @@ const Quotes = () => {
 			</View>
 			<View style={{ flexDirection:"row", justifyContent: 'space-around', padding: 15}}>
 				{quoteIndex !== 0 && <Button onPress={() => {setQuoteIndex(quoteIndex-1); console.log("back")}} title="Back"/>}
-				
 				{quoteIndex !== quotes?.length -1 &&<Button onPress={() => {setQuoteIndex(quoteIndex+1); console.log("next")}} title="Next"/>}
 			</View>
-			<TextInput style={styles.input} placeholder="Share your thoughts"/>
+			<TextInput style={styles.input} onChangeText={textInput => setTextInput(textInput)} placeholder="Share your thoughts" value={textInput} multiline
+        numberOfLines={8}/>
 			<View style={{padding: 15}}>
-				<Button onPress={() => {console.log("submit");}} title="Submit"/>
+				<Button onPress={() => sendQuote()} title="Submit"/>
 			</View>
 
 		</>	
